@@ -3,15 +3,13 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  // Remove the 'root' property. Vite will default to the directory
-  // where the config file is located, which is `frontend`.
-  //
-  // Alternatively, you can explicitly set it:
-  // root: '.',
-
+  // Remove the 'root' property or set it to '.'
+  // Vite will use the directory where the config is located by default.
+  // The 'public' folder will be automatically recognized as the public asset directory.
+  // So there is no need to explicitly specify the 'root'
+  // and doing so can sometimes cause issues.
+  
   build: {
-    // The build output should go to the `dist` folder inside the
-    // `frontend` directory.
     outDir: 'dist',
     emptyOutDir: true,
   },
