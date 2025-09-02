@@ -10,7 +10,7 @@ COPY package.json ./
 # Install all project dependencies
 RUN npm install
 
-# Copy the entire project code into the container
+# Copy the entire project code, including the public directory, into the container
 COPY . .
 
 # Run the build command
