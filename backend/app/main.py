@@ -10,7 +10,7 @@ app = FastAPI(
 
 origins = [
     "http://localhost:3000",
-    "https://your-frontend-service-name.onrender.com",
+    "https://math-routing-planet-frontend.onrender.com",
 ]
 
 app.add_middleware(
