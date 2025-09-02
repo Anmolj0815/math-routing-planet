@@ -9,3 +9,4 @@ python-dotenv
 tavily-python
 google-generativeai
 pypdf
+langchain-google-genai
