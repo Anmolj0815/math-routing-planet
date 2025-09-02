@@ -3,8 +3,7 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  // This is the crucial part that fixes the Docker build error
-  root: 'frontend',
+  root: '.', // Set the root to the current directory
   build: {
     outDir: 'dist',
     emptyOutDir: true,
