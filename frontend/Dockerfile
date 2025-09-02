@@ -10,8 +10,10 @@ COPY package.json ./
 # Install all project dependencies
 RUN npm install
 
-# Copy the entire project code into the container
-COPY . .
+# Copy the source and public directories explicitly
+COPY public ./public
+COPY src ./src
+COPY vite.config.js ./
 
 # Run the build command
 RUN npm run build
