@@ -1,29 +1,21 @@
-# Stage 1: Build the React application
-FROM node:20-alpine AS build
+# Use a Node.js base image
+FROM node:20-alpine
 
-# Set the working directory inside the container
+# Set the working directory
 WORKDIR /app
 
-# Copy the package.json file to the working directory
+# Copy the package.json file and install dependencies
 COPY package.json ./
-
-# Install all project dependencies
 RUN npm install
 
-# Copy the entire project code into the container
+# Copy the rest of the application code
 COPY . .
 
 # Run the build command
 RUN npm run build
 
-# Stage 2: Serve the built application with a lightweight web server
-FROM nginx:alpine
-
-# Copy the production files from the build stage to the Nginx public directory
-COPY --from=build /app/dist /usr/share/nginx/html
-
-# Expose port 80 to allow external access
+# Expose the port that the app will run on
 EXPOSE 80
 
-# Command to start the Nginx server
-CMD ["nginx", "-g", "daemon off;"]
+# Command to serve the built application
+CMD ["npm", "run", "preview"]
