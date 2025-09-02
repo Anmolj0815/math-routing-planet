@@ -13,6 +13,9 @@ RUN npm install
 # Copy the rest of the application code
 COPY . .
 
+# Move index.html to the root of the working directory
+RUN mv ./public/index.html .
+
 # Build the React app for production
 RUN npm run build
 
