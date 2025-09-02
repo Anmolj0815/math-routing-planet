@@ -16,35 +16,26 @@ class AgentState(TypedDict):
     route: str
     response: str
 
-# You'll need to add your Tavily API Key to Render's environment variables.
 tavily_tool = TavilySearchResults(api_key=os.getenv("TAVILY_API_KEY"))
 llm = ChatGoogleGenerativeAI(model="gemini-pro", google_api_key=os.getenv("GEMINI_API_KEY"))
 
-# Define nodes
 def retrieve_documents(state):
-    print("---Retrieving documents from knowledge base---")
-    vector_store = get_vector_store(embeddings=None)  # Pass actual embeddings here
+    embeddings=None
+    vector_store = get_vector_store(embeddings=embeddings)
     retriever = vector_store.as_retriever()
     documents = retriever.invoke(state["query"])
     return {"documents": documents, "route": "knowledge_base"}
 
 def web_search(state):
-    print("---Performing web search---")
     tool_input = {"query": state["query"]}
     results = tavily_tool.invoke(tool_input)
-    # The MCP part would be integrated here to process results
     return {"documents": [Document(page_content=str(results))], "route": "web_search"}
 
 def generate_response(state):
-    print("---Generating final response---")
     prompt = ChatPromptTemplate.from_template("""
-        You are a helpful math professor.
-    Given the following documents and the user's question, provide a detailed, step-by-step solution.
-    Simplify the solution to make it easy for a student to understand.
-    If the question is not about mathematics, politely decline to answer.
-    
-    Documents: {documents}
-    Question: {query}
+        Answer the user's query based on the following documents:
+        {documents}
+        Query: {query}
         Provide the answer in a structured JSON format with Decision, Amount, and Justification.
     """)
     document_chain = create_stuff_documents_chain(llm, prompt)
@@ -52,16 +43,16 @@ def generate_response(state):
     return {"response": response}
 
 def router_node(state):
-    print("---Routing query---")
-    # This is a basic routing logic. You'll need to use an LLM for more advanced routing.
-    # E.g., using a prompt like "Is this a specific, known math problem or a general query that requires search?"
     if "web" in state["query"].lower() or "search" in state["query"].lower():
         return "web_search"
     else:
         return "knowledge_base"
 
-# Build the LangGraph
 workflow = StateGraph(AgentState)
+
+# This is the line that was missing and caused the error
+workflow.add_node("router", router_node)
+
 workflow.add_node("retrieve_documents", retrieve_documents)
 workflow.add_node("web_search", web_search)
 workflow.add_node("generate_response", generate_response)
