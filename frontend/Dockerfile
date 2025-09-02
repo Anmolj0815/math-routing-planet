@@ -13,8 +13,8 @@ RUN npm install
 # Copy the entire project code into the container
 COPY . .
 
-# Run the build command with the explicit config path
-RUN npm run build --config ./vite.config.js
+# Run the build command
+RUN npm run build
 
 # Stage 2: Serve the built application with a lightweight web server
 FROM nginx:alpine
