@@ -3,5 +3,10 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  root: '.' // This tells Vite to use the current directory (frontend) as the root
+  // This is the crucial part that fixes the Docker build error
+  root: 'frontend',
+  build: {
+    outDir: 'dist',
+    emptyOutDir: true,
+  }
 });
