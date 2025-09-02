@@ -4,28 +4,23 @@ FROM node:20-alpine AS build
 # Set the working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json (if it exists) to the container
+# Copy package.json and install dependencies
 COPY package.json ./
-
-# Install project dependencies
 RUN npm install
 
-# Copy the rest of the application code
+# Copy the entire project into the container
 COPY . .
-
-# Move index.html to the root of the working directory
-RUN mv ./public/index.html .
 
 # Build the React app for production
 RUN npm run build
 
-# Stage 2: Serve the application with a lightweight web server (Nginx)
+# Stage 2: Serve the application with Nginx
 FROM nginx:alpine
 
 # Copy the build output from the previous stage to the Nginx public folder
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Expose port 80 for the web server
+# Expose port 80
 EXPOSE 80
 
 # Command to start Nginx
