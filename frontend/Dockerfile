@@ -10,11 +10,11 @@ COPY package.json ./
 # Install all project dependencies
 RUN npm install
 
-# Copy the rest of the application code into the container
+# Copy the entire project code into the container
 COPY . .
 
-# Run the build command to create the production bundle
-RUN npm run build
+# Run the build command with the explicit config path
+RUN npm run build --config ./vite.config.js
 
 # Stage 2: Serve the built application with a lightweight web server
 FROM nginx:alpine
