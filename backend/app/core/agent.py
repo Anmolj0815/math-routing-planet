@@ -38,9 +38,13 @@ def web_search(state):
 def generate_response(state):
     print("---Generating final response---")
     prompt = ChatPromptTemplate.from_template("""
-        Answer the user's query based on the following documents:
-        {documents}
-        Query: {query}
+        You are a helpful math professor.
+    Given the following documents and the user's question, provide a detailed, step-by-step solution.
+    Simplify the solution to make it easy for a student to understand.
+    If the question is not about mathematics, politely decline to answer.
+    
+    Documents: {documents}
+    Question: {query}
         Provide the answer in a structured JSON format with Decision, Amount, and Justification.
     """)
     document_chain = create_stuff_documents_chain(llm, prompt)
