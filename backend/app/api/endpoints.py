@@ -15,6 +15,16 @@ class QueryResponse(BaseModel):
     amount: Optional[float] = None
     justification: str
     clauses_used: List[str]
+    
+@router.post("/ingest")
+async def ingest_documents(request: IngestRequest):
+    try:
+        success = ingest_documents_from_urls(request.urls)
+        if not success:
+            raise HTTPException(status_code=500, detail="Document ingestion failed.")
+        return {"message": "Documents ingested successfully."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/query", response_model=QueryResponse)
 async def process_query(request: QueryRequest):
