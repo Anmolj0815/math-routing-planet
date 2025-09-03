@@ -42,7 +42,7 @@ def web_search(state: AgentState):
     return {"documents": [Document(page_content=str(results))], "route": "web_search"}
 
 def generate_response(state: AgentState):
-    prompt = PromptTemplate(
+    prompt = ChatPromptTemplate(
     input_variables=["context", "query"],
     template="""
 You are a math reasoning assistant.
