@@ -9,7 +9,7 @@ app = FastAPI(
 )
 
 origins = [
-    "http://localhost:3000",
+    "http://localhost:8501",  # Streamlit default
     "https://math-routing-planet-frontend.onrender.com",
 ]
 
@@ -22,6 +22,7 @@ app.add_middleware(
 )
 
 app.include_router(router, prefix="/api")
+
 
 @app.get("/")
 async def root():
