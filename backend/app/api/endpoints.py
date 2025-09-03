@@ -1,13 +1,11 @@
-from fastapi import APIRouter, HTTPException
-from typing import List, Optional
+from fastapi import APIRouter
 from pydantic import BaseModel
-from ..core.processing import ingest_documents_from_urls
-from ..core.agent import math_agent_executor
+from typing import List, Optional
+import traceback
+import re
+from .agents import math_agent_executor  # import from your package
 
 router = APIRouter()
-
-class IngestRequest(BaseModel):
-    urls: List[str]
 
 class QueryRequest(BaseModel):
     query: str
@@ -18,29 +16,18 @@ class QueryResponse(BaseModel):
     justification: str
     clauses_used: List[str]
 
-@router.post("/ingest")
-async def ingest_documents(request: IngestRequest):
-    try:
-        success = ingest_documents_from_urls(request.urls)
-        if not success:
-            raise HTTPException(status_code=500, detail="Document ingestion failed.")
-        return {"message": "Documents ingested successfully."}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
 @router.post("/query", response_model=QueryResponse)
 async def process_query(request: QueryRequest):
     try:
         print(f"📩 Received query: {request.query}")
 
-        # --- Call the agent ---
+        # --- Call graph ASYNC and with correct state key ---
         try:
-            result = await math_agent_executor.invoke({"input": request.query})
-            print(f"✅ Agent raw result: {result}")
+            result_state = await math_agent_executor.ainvoke({"query": request.query})
+            print(f"✅ Graph state out: {result_state}")
         except Exception as agent_error:
-            print("❌ Error while calling agent:")
+            print("❌ Error while calling graph:")
             print(traceback.format_exc())
-            # Return graceful JSON response
             return QueryResponse(
                 decision="ERROR",
                 amount=None,
@@ -48,63 +35,54 @@ async def process_query(request: QueryRequest):
                 clauses_used=["No clauses extracted"]
             )
 
-        # --- Parse the result ---
-        if isinstance(result, dict) and 'output' in result:
-            agent_output = result['output']
-        else:
-            agent_output = str(result)
+        # The graph writes final text into result_state["response"]
+        agent_output = str(result_state.get("response", ""))
 
-        print(f"📝 Parsed agent output: {agent_output}")
-
-        # Default values
+        # --- Parse into your schema ---
         decision = "UNDER_REVIEW"
         amount = None
         justification = agent_output
-        clauses_used = []
+        clauses_used: List[str] = []
 
+        # Try to find structured JSON first (since we told LLM to return JSON)
         try:
-            # Decision parsing
-            if "APPROVED" in agent_output.upper():
+            import json
+            parsed = json.loads(agent_output)
+            # Normalize keys in a tolerant way
+            decision = str(parsed.get("Decision", decision)).upper()
+            amount = parsed.get("Amount", amount)
+            justification = parsed.get("Justification", justification)
+        except Exception:
+            # If it wasn't valid JSON, fall back to regex parsing
+            up = agent_output.upper()
+            if "APPROVED" in up:
                 decision = "APPROVED"
-            elif "REJECTED" in agent_output.upper() or "DENIED" in agent_output.upper():
+            elif "REJECTED" in up or "DENIED" in up:
                 decision = "REJECTED"
 
-            # Amount parsing
-            amount_match = re.search(r'\$?(\d+(?:,\d{3})*(?:\.\d{2})?)', agent_output)
-            if amount_match:
-                amount_str = amount_match.group(1).replace(',', '')
-                amount = float(amount_str)
+            amt_match = re.search(r'\$?(\d+(?:,\d{3})*(?:\.\d{1,2})?)', agent_output)
+            if amt_match:
+                amount = float(amt_match.group(1).replace(",", ""))
 
-            # Clause extraction
-            clause_patterns = [
-                r'clause\s+(\d+)',
-                r'section\s+(\w+)',
-                r'article\s+(\w+)',
-            ]
-            for pattern in clause_patterns:
-                matches = re.findall(pattern, agent_output, re.IGNORECASE)
-                clauses_used.extend([f"Clause {match}" for match in matches])
-
-        except Exception as parse_error:
-            print("⚠️ Parsing error:")
-            print(traceback.format_exc())
-            justification += f"\n\n(Parsing error: {str(parse_error)})"
+        # Extract clause-like mentions, if any
+        for pat in [r'clause\s+([\w\-\.]+)', r'section\s+([\w\-\.]+)', r'article\s+([\w\-\.]+)']:
+            for m in re.findall(pat, agent_output, flags=re.IGNORECASE):
+                clauses_used.append(f"Clause {m}")
 
         if not clauses_used:
             clauses_used = ["Based on document analysis"]
 
-        # --- Always return structured JSON ---
         return QueryResponse(
             decision=decision,
             amount=amount,
             justification=justification,
-            clauses_used=clauses_used,
+            clauses_used=clauses_used
         )
 
     except Exception as e:
-        # Catch-all safeguard
-        print("💥 Unexpected error in process_query:")
+        print("💥 Unexpected error in /query:")
         print(traceback.format_exc())
+        # Never raise HTTPException; return JSON so the frontend never sees a 500
         return QueryResponse(
             decision="ERROR",
             amount=None,
