@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from typing import List, Optional
 import traceback
 import re
+from ..core.processing import ingest_documents_from_urls
 from ..core.agent import math_agent_executor  # import from your package
 
 router = APIRouter()
