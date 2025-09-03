@@ -61,13 +61,6 @@ def generate_response(llm):
 
     return document_chain
 
-
-    document_chain = create_stuff_documents_chain(llm, prompt)
-    response = document_chain.invoke(
-        {"documents": state["documents"], "query": state["query"]}
-    )
-    return {"response": response}
-
 def router_node(state: AgentState):
     if "web" in state["query"].lower() or "search" in state["query"].lower():
         return {"route": "web_search"}
