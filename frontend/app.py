@@ -322,6 +322,45 @@ st.markdown("""
     Advanced AI-powered mathematical reasoning with explainable decision-making architecture
     <br>Built with cutting-edge RAG technology for intelligent query processing
 </div>
+
+<script>
+// Force text color fix for textarea
+setTimeout(function() {
+    const textareas = document.querySelectorAll('textarea');
+    textareas.forEach(function(textarea) {
+        textarea.style.color = '#1a202c !important';
+        textarea.style.background = 'white !important';
+        textarea.style.fontWeight = '400';
+        
+        // Also fix on input event
+        textarea.addEventListener('input', function() {
+            this.style.color = '#1a202c !important';
+            this.style.background = 'white !important';
+        });
+    });
+    
+    // Fix sidebar text
+    const sidebar = document.querySelector('[data-testid="stSidebar"]');
+    if (sidebar) {
+        sidebar.style.color = 'white !important';
+        const allElements = sidebar.querySelectorAll('*');
+        allElements.forEach(function(el) {
+            if (el.tagName !== 'TEXTAREA' && el.tagName !== 'INPUT') {
+                el.style.color = 'white !important';
+            }
+        });
+    }
+}, 1000);
+
+// Repeat every 2 seconds to ensure it sticks
+setInterval(function() {
+    const textareas = document.querySelectorAll('textarea');
+    textareas.forEach(function(textarea) {
+        textarea.style.color = '#1a202c !important';
+        textarea.style.background = 'white !important';
+    });
+}, 2000);
+</script>
 """, unsafe_allow_html=True)
 
 # --- Sidebar with Enhanced Features ---
