@@ -5,7 +5,7 @@ import os
 from typing import Optional, Dict, Any
 
 # Configuration
-API_URL = os.getenv('API_URL', 'https://math-routing-planet-backend.onrender.com')  # Replace with your backend URL
+API_URL = os.getenv('API_URL', 'https://your-backend-url.com')  # Replace with your backend URL
 
 # Page config
 st.set_page_config(
@@ -170,20 +170,31 @@ def main():
                 if not urls_input.strip():
                     st.warning("⚠️ Please enter at least one PDF URL")
                 else:
-                    with st.spinner("🔄 Ingesting documents... This may take a while."):
-                        # Process URLs
-                        urls = [url.strip() for url in urls_input.split(',') if url.strip()]
+                    # Process URLs
+                    urls = [url.strip() for url in urls_input.split(',') if url.strip()]
+                    
+                    # Show progress
+                    progress_bar = st.progress(0)
+                    status_text = st.empty()
+                    
+                    with st.spinner("🔄 Ingesting documents... This may take several minutes for large documents."):
+                        status_text.text("Connecting to backend...")
+                        progress_bar.progress(10)
                         
                         # Make API request
                         response = make_request("/api/ingest", {"urls": urls})
                         
+                        progress_bar.progress(100)
+                        
                         if response:
                             st.session_state.ingestion_success = True
+                            status_text.text("✅ Success!")
                             st.markdown('<div class="success-message">✅ Documents ingested successfully!</div>', unsafe_allow_html=True)
                             st.balloons()
                         else:
                             st.session_state.ingestion_success = False
-                            st.markdown('<div class="error-message">❌ Failed to ingest documents. Please check your URLs and try again.</div>', unsafe_allow_html=True)
+                            status_text.text("❌ Failed!")
+                            st.markdown('<div class="error-message">❌ Failed to ingest documents. The process may have taken too long or there was a connection issue. Please check your backend logs and try again.</div>', unsafe_allow_html=True)
     
     with tab2:
         st.markdown('<h2 class="section-header">❓ Ask a Question</h2>', unsafe_allow_html=True)
