@@ -31,79 +31,83 @@ async def ingest_documents(request: IngestRequest):
 @router.post("/query", response_model=QueryResponse)
 async def process_query(request: QueryRequest):
     try:
-        print(f"Processing query: {request.query}")
-        
-        # Call the agent
-        result = await math_agent_executor.invoke({"input": request.query})
-        
-        print(f"Agent result: {result}")
-        
-        # Parse the agent result
-        # The result structure depends on how your agent returns data
-        # Common patterns:
-        
-        # Pattern 1: If result is a dict with 'output' key
+        print(f"📩 Received query: {request.query}")
+
+        # --- Call the agent ---
+        try:
+            result = await math_agent_executor.invoke({"input": request.query})
+            print(f"✅ Agent raw result: {result}")
+        except Exception as agent_error:
+            print("❌ Error while calling agent:")
+            print(traceback.format_exc())
+            # Return graceful JSON response
+            return QueryResponse(
+                decision="ERROR",
+                amount=None,
+                justification=f"Agent execution failed: {str(agent_error)}",
+                clauses_used=["No clauses extracted"]
+            )
+
+        # --- Parse the result ---
         if isinstance(result, dict) and 'output' in result:
             agent_output = result['output']
         else:
             agent_output = str(result)
-        
-        # Now you need to parse the agent_output to extract:
-        # - decision (APPROVED/REJECTED/etc.)
-        # - amount (if any)
-        # - justification
-        # - clauses_used
-        
-        # Example parsing (adjust based on your agent's actual output format):
-        decision = "PENDING"  # Default
+
+        print(f"📝 Parsed agent output: {agent_output}")
+
+        # Default values
+        decision = "UNDER_REVIEW"
         amount = None
-        justification = agent_output  # Use full output as justification for now
+        justification = agent_output
         clauses_used = []
-        
-        # If your agent returns structured data, parse it properly
-        # For example, if agent returns JSON-like structure:
+
         try:
-            import json
-            import re
-            
-            # Try to find decision in the output
+            # Decision parsing
             if "APPROVED" in agent_output.upper():
                 decision = "APPROVED"
             elif "REJECTED" in agent_output.upper() or "DENIED" in agent_output.upper():
                 decision = "REJECTED"
-            else:
-                decision = "UNDER_REVIEW"
-            
-            # Try to extract amount using regex
+
+            # Amount parsing
             amount_match = re.search(r'\$?(\d+(?:,\d{3})*(?:\.\d{2})?)', agent_output)
             if amount_match:
                 amount_str = amount_match.group(1).replace(',', '')
                 amount = float(amount_str)
-            
-            # Extract clauses (if mentioned in output)
+
+            # Clause extraction
             clause_patterns = [
                 r'clause\s+(\d+)',
                 r'section\s+(\w+)',
                 r'article\s+(\w+)',
             ]
-            
             for pattern in clause_patterns:
                 matches = re.findall(pattern, agent_output, re.IGNORECASE)
                 clauses_used.extend([f"Clause {match}" for match in matches])
-            
+
         except Exception as parse_error:
-            print(f"Parsing error: {parse_error}")
-            # Keep defaults
-        
-        return {
-            "decision": decision,
-            "amount": amount,
-            "justification": justification,
-            "clauses_used": clauses_used if clauses_used else ["Based on document analysis"],
-        }
-        
+            print("⚠️ Parsing error:")
+            print(traceback.format_exc())
+            justification += f"\n\n(Parsing error: {str(parse_error)})"
+
+        if not clauses_used:
+            clauses_used = ["Based on document analysis"]
+
+        # --- Always return structured JSON ---
+        return QueryResponse(
+            decision=decision,
+            amount=amount,
+            justification=justification,
+            clauses_used=clauses_used,
+        )
+
     except Exception as e:
-        print(f"Error in process_query: {str(e)}")
-        import traceback
+        # Catch-all safeguard
+        print("💥 Unexpected error in process_query:")
         print(traceback.format_exc())
-        raise HTTPException(status_code=500, detail=f"Query processing failed: {str(e)}")
+        return QueryResponse(
+            decision="ERROR",
+            amount=None,
+            justification=f"Unexpected error: {str(e)}",
+            clauses_used=["No clauses extracted"]
+        )
