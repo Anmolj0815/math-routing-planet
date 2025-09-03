@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "math-agent-frontend"
+version = "1.0.0"
+description = "Streamlit frontend for Math Agentic-RAG System"
+authors = [{name = "Your Name", email = "your.email@example.com"}]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "streamlit>=1.28.0",
+    "requests>=2.31.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/yourusername/math-agent-frontend"
+Repository = "https://github.com/yourusername/math-agent-frontend.git"
