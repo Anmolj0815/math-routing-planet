@@ -79,7 +79,7 @@ st.markdown("""
 def make_request(endpoint: str, data: Dict[Any, Any]) -> Optional[Dict]:
     """Make API request with error handling"""
     try:
-        response = requests.post(f"{API_URL}{endpoint}", json=data, timeout=30)
+        response = requests.post(f"{API_URL}{endpoint}", json=data, timeout=300)
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
