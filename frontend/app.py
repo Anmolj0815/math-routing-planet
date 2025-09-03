@@ -353,7 +353,7 @@ st.markdown("""
 # --- Enhanced Header Section ---
 st.markdown("""
 <div class="main-title">
-    🧮 Math Agentic-RAG System
+    🧮 Human in a loop- Math Routing Agent
 </div>
 <div class="subtitle">
     Advanced AI-powered mathematical reasoning with explainable decision-making architecture<br>
