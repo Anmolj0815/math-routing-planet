@@ -15,7 +15,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- Advanced Custom CSS with Animations and Modern Design ---
+# --- Fixed CSS with proper text visibility ---
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -39,12 +39,53 @@ st.markdown("""
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
     
+    /* Force text visibility */
+    .stApp, .stApp * {
+        color: white !important;
+    }
+    
+    /* Specific fixes for Streamlit elements */
+    .stMarkdown, .stMarkdown p, .stMarkdown div {
+        color: white !important;
+    }
+    
+    .stTextArea label {
+        color: white !important;
+        font-weight: 600 !important;
+        font-size: 16px !important;
+    }
+    
+    .stButton label {
+        color: white !important;
+    }
+    
+    .stTabs [data-baseweb="tab-list"] button {
+        color: white !important;
+        background: rgba(255, 255, 255, 0.1) !important;
+        border-radius: 10px !important;
+        margin-right: 10px !important;
+    }
+    
+    .stTabs [data-baseweb="tab-list"] button[aria-selected="true"] {
+        background: rgba(255, 255, 255, 0.2) !important;
+        color: white !important;
+    }
+    
+    .stExpander label {
+        color: white !important;
+        font-weight: 600 !important;
+    }
+    
+    .stDownloadButton label {
+        color: white !important;
+    }
+    
     /* Glassmorphism Effect */
     .glass-container {
-        background: rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.15) !important;
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3) !important;
         border-radius: 20px;
         box-shadow: 0 25px 45px rgba(0, 0, 0, 0.1);
         padding: 30px;
@@ -52,94 +93,107 @@ st.markdown("""
         animation: fadeInUp 0.8s ease-out;
     }
     
+    .glass-container * {
+        color: white !important;
+    }
+    
     /* Animated Title */
     .main-title {
-        font-size: 3.5rem;
-        font-weight: 700;
-        background: linear-gradient(135deg, #ffffff, #f0f0f0);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
+        font-size: 3.5rem !important;
+        font-weight: 700 !important;
+        color: white !important;
         text-align: center;
-        margin-bottom: 20px;
+        margin-bottom: 20px !important;
         animation: titleGlow 2s ease-in-out infinite alternate;
-        text-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+        text-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
     }
     
     .subtitle {
-        font-size: 1.2rem;
-        color: rgba(255, 255, 255, 0.9);
+        font-size: 1.2rem !important;
+        color: rgba(255, 255, 255, 0.9) !important;
         text-align: center;
-        margin-bottom: 40px;
-        font-weight: 300;
+        margin-bottom: 40px !important;
+        font-weight: 300 !important;
         line-height: 1.6;
         animation: fadeIn 1s ease-out 0.5s both;
     }
     
     /* Enhanced Buttons */
     .stButton > button {
-        background: linear-gradient(135deg, #4ecdc4, #44a08d);
-        color: white;
-        font-weight: 600;
-        font-size: 16px;
-        border: none;
-        border-radius: 50px;
-        padding: 15px 40px;
+        background: linear-gradient(135deg, #4ecdc4, #44a08d) !important;
+        color: white !important;
+        font-weight: 600 !important;
+        font-size: 16px !important;
+        border: none !important;
+        border-radius: 50px !important;
+        padding: 15px 40px !important;
         transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         box-shadow: 0 10px 30px rgba(78, 205, 196, 0.3);
         position: relative;
         overflow: hidden;
     }
     
-    .stButton > button:before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-        transition: left 0.6s;
-    }
-    
-    .stButton > button:hover:before {
-        left: 100%;
-    }
-    
     .stButton > button:hover {
-        transform: translateY(-3px) scale(1.05);
-        box-shadow: 0 20px 40px rgba(78, 205, 196, 0.4);
+        transform: translateY(-3px) scale(1.05) !important;
+        box-shadow: 0 20px 40px rgba(78, 205, 196, 0.4) !important;
+        color: white !important;
     }
     
-    /* Modern Input Fields */
+    /* Text Input Fields - FIXED */
     .stTextArea > div > div > textarea {
-        background: rgba(255, 255, 255, 0.1);
-        border: 2px solid rgba(255, 255, 255, 0.2);
-        border-radius: 15px;
-        color: white;
-        font-size: 16px;
-        padding: 20px;
-        backdrop-filter: blur(10px);
+        background: white !important;
+        border: 2px solid rgba(255, 255, 255, 0.3) !important;
+        border-radius: 15px !important;
+        color: #2d3748 !important;
+        font-size: 16px !important;
+        padding: 20px !important;
         transition: all 0.3s ease;
     }
     
     .stTextArea > div > div > textarea:focus {
-        border-color: var(--accent-color);
-        box-shadow: 0 0 20px rgba(240, 147, 251, 0.3);
-        transform: scale(1.02);
+        border-color: var(--accent-color) !important;
+        box-shadow: 0 0 20px rgba(240, 147, 251, 0.3) !important;
+        color: #2d3748 !important;
     }
     
-    /* Floating Cards */
-    .metric-card {
-        background: rgba(255, 255, 255, 0.15);
+    .stTextArea > div > div > textarea::placeholder {
+        color: #a0aec0 !important;
+    }
+    
+    /* Sidebar Fixes */
+    .css-1d391kg {
+        background: rgba(255, 255, 255, 0.1) !important;
         backdrop-filter: blur(20px);
-        border-radius: 20px;
-        padding: 25px;
-        margin: 15px 0;
-        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .css-1d391kg * {
+        color: white !important;
+    }
+    
+    section[data-testid="stSidebar"] {
+        background: rgba(255, 255, 255, 0.1) !important;
+        backdrop-filter: blur(20px);
+    }
+    
+    section[data-testid="stSidebar"] * {
+        color: white !important;
+    }
+    
+    /* Metric Cards */
+    .metric-card {
+        background: rgba(255, 255, 255, 0.15) !important;
+        backdrop-filter: blur(20px);
+        border-radius: 20px !important;
+        padding: 25px !important;
+        margin: 15px 0 !important;
+        border: 1px solid rgba(255, 255, 255, 0.3) !important;
         box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
         transition: all 0.4s ease;
         animation: float 6s ease-in-out infinite;
+    }
+    
+    .metric-card * {
+        color: white !important;
     }
     
     .metric-card:hover {
@@ -147,83 +201,76 @@ st.markdown("""
         box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
     }
     
-    /* Loading Animation */
-    .loading-container {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 40px;
-    }
-    
-    .loading-spinner {
-        width: 60px;
-        height: 60px;
-        border: 4px solid rgba(255, 255, 255, 0.3);
-        border-left: 4px solid #4ecdc4;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-    }
-    
     /* Status Messages */
     .success-message {
-        background: linear-gradient(135deg, #4ecdc4, #44a08d);
-        color: white;
-        padding: 20px;
-        border-radius: 15px;
-        margin: 20px 0;
+        background: linear-gradient(135deg, #4ecdc4, #44a08d) !important;
+        color: white !important;
+        padding: 20px !important;
+        border-radius: 15px !important;
+        margin: 20px 0 !important;
         box-shadow: 0 10px 30px rgba(78, 205, 196, 0.3);
         animation: slideInRight 0.5s ease-out;
     }
     
     .error-message {
-        background: linear-gradient(135deg, #ff6b6b, #ee5a52);
-        color: white;
-        padding: 20px;
-        border-radius: 15px;
-        margin: 20px 0;
+        background: linear-gradient(135deg, #ff6b6b, #ee5a52) !important;
+        color: white !important;
+        padding: 20px !important;
+        border-radius: 15px !important;
+        margin: 20px 0 !important;
         box-shadow: 0 10px 30px rgba(255, 107, 107, 0.3);
         animation: shake 0.5s ease-out;
     }
     
     /* Answer Display */
     .answer-container {
-        background: rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.15) !important;
         backdrop-filter: blur(20px);
-        border-radius: 20px;
-        padding: 30px;
-        margin: 20px 0;
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 20px !important;
+        padding: 30px !important;
+        margin: 20px 0 !important;
+        border: 1px solid rgba(255, 255, 255, 0.3) !important;
         animation: fadeInUp 0.6s ease-out;
     }
     
     .answer-text {
-        color: white;
-        font-size: 18px;
-        line-height: 1.8;
-        font-weight: 400;
+        color: white !important;
+        font-size: 18px !important;
+        line-height: 1.8 !important;
+        font-weight: 400 !important;
     }
     
-    /* Sidebar Enhancements */
-    .css-1d391kg {
-        background: rgba(255, 255, 255, 0.05);
-        backdrop-filter: blur(20px);
+    /* Download Buttons */
+    .stDownloadButton > button {
+        background: linear-gradient(135deg, #667eea, #764ba2) !important;
+        color: white !important;
+        font-weight: 600 !important;
+        border: none !important;
+        border-radius: 15px !important;
+        padding: 12px 24px !important;
+        transition: all 0.3s ease;
     }
     
-    /* Progress Bar */
-    .progress-container {
-        width: 100%;
-        height: 6px;
-        background: rgba(255, 255, 255, 0.2);
-        border-radius: 3px;
-        margin: 20px 0;
-        overflow: hidden;
+    .stDownloadButton > button:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3) !important;
+        color: white !important;
     }
     
-    .progress-bar {
-        height: 100%;
-        background: linear-gradient(90deg, #4ecdc4, #44a08d);
-        border-radius: 3px;
-        animation: progressLoad 2s ease-in-out;
+    /* JSON viewer */
+    .stJson {
+        background: rgba(255, 255, 255, 0.1) !important;
+        border-radius: 10px !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    }
+    
+    /* Progress bar */
+    .stProgress .st-bo {
+        background: rgba(255, 255, 255, 0.2) !important;
+    }
+    
+    .stProgress .st-bp {
+        background: linear-gradient(90deg, #4ecdc4, #44a08d) !important;
     }
     
     /* Keyframe Animations */
@@ -253,11 +300,6 @@ st.markdown("""
         50% { transform: translateY(-10px); }
     }
     
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
-    
     @keyframes slideInRight {
         from {
             opacity: 0;
@@ -275,20 +317,15 @@ st.markdown("""
         75% { transform: translateX(5px); }
     }
     
-    @keyframes progressLoad {
-        0% { width: 0%; }
-        100% { width: 100%; }
-    }
-    
     /* Responsive Design */
     @media (max-width: 768px) {
         .main-title {
-            font-size: 2.5rem;
+            font-size: 2.5rem !important;
         }
         
         .glass-container {
-            padding: 20px;
-            margin: 10px 0;
+            padding: 20px !important;
+            margin: 10px 0 !important;
         }
     }
     
@@ -319,71 +356,28 @@ st.markdown("""
     🧮 Math Agentic-RAG System
 </div>
 <div class="subtitle">
-    Advanced AI-powered mathematical reasoning with explainable decision-making architecture
-    <br>Built with cutting-edge RAG technology for intelligent query processing
+    Advanced AI-powered mathematical reasoning with explainable decision-making architecture<br>
+    Built with cutting-edge RAG technology for intelligent query processing
 </div>
-
-<script>
-// Force text color fix for textarea
-setTimeout(function() {
-    const textareas = document.querySelectorAll('textarea');
-    textareas.forEach(function(textarea) {
-        textarea.style.color = '#1a202c !important';
-        textarea.style.background = 'white !important';
-        textarea.style.fontWeight = '400';
-        
-        // Also fix on input event
-        textarea.addEventListener('input', function() {
-            this.style.color = '#1a202c !important';
-            this.style.background = 'white !important';
-        });
-    });
-    
-    // Fix sidebar text
-    const sidebar = document.querySelector('[data-testid="stSidebar"]');
-    if (sidebar) {
-        sidebar.style.color = 'white !important';
-        const allElements = sidebar.querySelectorAll('*');
-        allElements.forEach(function(el) {
-            if (el.tagName !== 'TEXTAREA' && el.tagName !== 'INPUT') {
-                el.style.color = 'white !important';
-            }
-        });
-    }
-}, 1000);
-
-// Repeat every 2 seconds to ensure it sticks
-setInterval(function() {
-    const textareas = document.querySelectorAll('textarea');
-    textareas.forEach(function(textarea) {
-        textarea.style.color = '#1a202c !important';
-        textarea.style.background = 'white !important';
-    });
-}, 2000);
-</script>
 """, unsafe_allow_html=True)
 
 # --- Sidebar with Enhanced Features ---
 with st.sidebar:
-    st.markdown("""
-    <div class="glass-container">
-        <h3 style="color: white; text-align: center; margin-bottom: 15px;">🚀 System Status</h3>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown("### 🚀 System Status", unsafe_allow_html=True)
     
     # System metrics with enhanced styling
     st.markdown("""
-    <div style="background: rgba(255, 255, 255, 0.1); border-radius: 15px; padding: 20px; margin: 15px 0; border: 1px solid rgba(255, 255, 255, 0.2);">
+    <div class="metric-card">
         <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
             <div style="text-align: center; flex: 1;">
                 <div style="color: #4ecdc4; font-size: 24px; font-weight: bold;">🟢</div>
-                <div style="color: white; font-size: 14px; margin: 5px 0;">API Status</div>
+                <div style="color: white; font-size: 14px; margin: 5px 0; font-weight: bold;">API Status</div>
                 <div style="color: #4ecdc4; font-size: 16px; font-weight: bold;">Online</div>
                 <div style="color: rgba(255,255,255,0.7); font-size: 12px;">100% uptime</div>
             </div>
             <div style="text-align: center; flex: 1;">
                 <div style="color: #4ecdc4; font-size: 24px; font-weight: bold;">⚡</div>
-                <div style="color: white; font-size: 14px; margin: 5px 0;">Response Time</div>
+                <div style="color: white; font-size: 14px; margin: 5px 0; font-weight: bold;">Response Time</div>
                 <div style="color: #4ecdc4; font-size: 16px; font-weight: bold;">~2.3s</div>
                 <div style="color: rgba(255,255,255,0.7); font-size: 12px;">-0.5s faster</div>
             </div>
@@ -392,39 +386,39 @@ with st.sidebar:
     """, unsafe_allow_html=True)
     
     # Quick stats
+    st.markdown("### 📊 System Features", unsafe_allow_html=True)
     st.markdown("""
     <div class="metric-card">
-        <h4 style="color: white; margin-bottom: 15px; text-align: center;">📊 Quick Stats</h4>
-        <div style="color: rgba(255,255,255,0.9); margin: 8px 0; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 8px;">
-            <span style="color: #4ecdc4;">•</span> Advanced RAG Architecture
+        <div style="color: white; margin: 8px 0; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+            <span style="color: #4ecdc4; font-weight: bold;">•</span> Advanced RAG Architecture
         </div>
-        <div style="color: rgba(255,255,255,0.9); margin: 8px 0; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 8px;">
-            <span style="color: #4ecdc4;">•</span> Real-time Processing
+        <div style="color: white; margin: 8px 0; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+            <span style="color: #4ecdc4; font-weight: bold;">•</span> Real-time Processing
         </div>
-        <div style="color: rgba(255,255,255,0.9); margin: 8px 0; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 8px;">
-            <span style="color: #4ecdc4;">•</span> Explainable AI Decisions
+        <div style="color: white; margin: 8px 0; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+            <span style="color: #4ecdc4; font-weight: bold;">•</span> Explainable AI Decisions
         </div>
-        <div style="color: rgba(255,255,255,0.9); margin: 8px 0; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 8px;">
-            <span style="color: #4ecdc4;">•</span> JSON Export Support
+        <div style="color: white; margin: 8px 0; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+            <span style="color: #4ecdc4; font-weight: bold;">•</span> JSON Export Support
         </div>
     </div>
     """, unsafe_allow_html=True)
     
     # Tips section
+    st.markdown("### 💡 Pro Tips", unsafe_allow_html=True)
     st.markdown("""
-    <div style="background: rgba(255, 255, 255, 0.1); border-radius: 15px; padding: 20px; margin: 15px 0; border: 1px solid rgba(255, 255, 255, 0.2);">
-        <h4 style="color: white; margin-bottom: 15px; text-align: center;">💡 Pro Tips</h4>
-        <div style="color: rgba(255,255,255,0.9); margin: 8px 0;">
-            <span style="color: #f093fb;">→</span> Be specific with your math questions
+    <div class="metric-card">
+        <div style="color: white; margin: 8px 0;">
+            <span style="color: #f093fb; font-weight: bold;">→</span> Be specific with your math questions
         </div>
-        <div style="color: rgba(255,255,255,0.9); margin: 8px 0;">
-            <span style="color: #f093fb;">→</span> Include context for better results
+        <div style="color: white; margin: 8px 0;">
+            <span style="color: #f093fb; font-weight: bold;">→</span> Include context for better results
         </div>
-        <div style="color: rgba(255,255,255,0.9); margin: 8px 0;">
-            <span style="color: #f093fb;">→</span> Check the justification for transparency
+        <div style="color: white; margin: 8px 0;">
+            <span style="color: #f093fb; font-weight: bold;">→</span> Check the justification for transparency
         </div>
-        <div style="color: rgba(255,255,255,0.9); margin: 8px 0;">
-            <span style="color: #f093fb;">→</span> Download results for analysis
+        <div style="color: white; margin: 8px 0;">
+            <span style="color: #f093fb; font-weight: bold;">→</span> Download results for analysis
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -435,10 +429,11 @@ st.markdown("### 🎯 Enter Your Mathematical Query")
 
 # Enhanced input area
 query = st.text_area(
-    "",
+    "Your Question:",
     placeholder="Enter your mathematical question here... (e.g., 'What are the subjects of K-2?' or 'Solve the quadratic equation x² + 5x + 6 = 0')",
     height=150,
-    help="Type your question clearly for best results"
+    help="Type your question clearly for best results",
+    key="query_input"
 )
 
 # Action buttons in columns for better layout
@@ -461,124 +456,101 @@ if solve_button:
         progress_bar = st.progress(0)
         status_text = st.empty()
         
-        # Animated loading
-        with st.spinner(""):
+        try:
+            # Simulate processing steps
+            for i, step in enumerate([
+                "🔍 Analyzing query structure...",
+                "🧠 Processing with AI agents...",
+                "📚 Retrieving relevant information...",
+                "⚡ Generating intelligent response...",
+                "✨ Finalizing results..."
+            ]):
+                status_text.markdown(f"**{step}**")
+                progress_bar.progress((i + 1) * 20)
+                time.sleep(0.3)
+            
+            # API call
+            response = requests.post(
+                f"{API_URL}/api/query", 
+                json={"query": query}, 
+                timeout=300
+            )
+            response.raise_for_status()
+            result = response.json()
+            
+            # Clear progress indicators
+            progress_bar.empty()
+            status_text.empty()
+            
+            # Success message
             st.markdown("""
-            <div class="loading-container">
-                <div class="loading-spinner"></div>
+            <div class="success-message">
+                ✅ Analysis Complete! Your mathematical query has been successfully processed.
             </div>
             """, unsafe_allow_html=True)
             
-            try:
-                # Simulate processing steps
-                for i, step in enumerate([
-                    "🔍 Analyzing query structure...",
-                    "🧠 Processing with AI agents...",
-                    "📚 Retrieving relevant information...",
-                    "⚡ Generating intelligent response...",
-                    "✨ Finalizing results..."
-                ]):
-                    status_text.text(step)
-                    progress_bar.progress((i + 1) * 20)
-                    time.sleep(0.3)
-                
-                # API call
-                response = requests.post(
-                    f"{API_URL}/api/query", 
-                    json={"query": query}, 
-                    timeout=300
-                )
-                response.raise_for_status()
-                result = response.json()
-                
-                # Clear progress indicators
-                progress_bar.empty()
-                status_text.empty()
-                
-                # Success message
-                st.markdown("""
-                <div class="success-message">
-                    ✅ Analysis Complete! Your mathematical query has been successfully processed.
+            # Enhanced answer display
+            st.markdown("""
+            <div class="answer-container">
+                <h3 style="color: white; margin-bottom: 20px;">💡 Solution</h3>
+                <div class="answer-text">
+            """, unsafe_allow_html=True)
+            
+            answer = result.get('answer', 'No answer found')
+            st.markdown(f"**Answer:** {answer}")
+            
+            st.markdown("""
                 </div>
-                """, unsafe_allow_html=True)
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Enhanced results section
+            st.markdown("---")
+            
+            # Create tabs for different views
+            tab1, tab2, tab3 = st.tabs(["📊 Analysis Details", "🔍 Decision Process", "📁 Export Data"])
+            
+            with tab1:
+                col1, col2 = st.columns(2)
                 
-                # Enhanced answer display
-                st.markdown("""
-                <div class="answer-container">
-                    <h3 style="color: white; margin-bottom: 20px;">💡 Solution</h3>
-                    <div class="answer-text">
-                """, unsafe_allow_html=True)
+                with col1:
+                    if result.get('decision'):
+                        st.markdown("#### 🎯 Decision")
+                        st.markdown(f"**{result['decision']}**")
                 
-                answer = result.get('answer', 'No answer found')
-                st.markdown(f"{answer}")
-                
-                st.markdown("""
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
-                
-                # Enhanced results section
-                st.markdown("---")
-                
-                # Create tabs for different views
-                tab1, tab2, tab3 = st.tabs(["📊 Analysis Details", "🔍 Decision Process", "📁 Export Data"])
-                
-                with tab1:
-                    col1, col2 = st.columns(2)
+                with col2:
+                    if result.get('amount'):
+                        st.markdown("#### 💰 Amount")
+                        st.markdown(f"**{result['amount']}**")
+            
+            with tab2:
+                if result.get('justification'):
+                    st.markdown("#### 🧩 Reasoning Process")
+                    justification = result.get('justification', {})
                     
-                    with col1:
-                        if result.get('decision'):
-                            st.markdown("""
-                            <div class="metric-card">
-                                <h4 style="color: white;">🎯 Decision</h4>
-                                <p style="color: rgba(255,255,255,0.9); font-size: 18px;">""" + 
-                                result['decision'] + """</p>
-                            </div>
-                            """, unsafe_allow_html=True)
-                    
-                    with col2:
-                        if result.get('amount'):
-                            st.markdown("""
-                            <div class="metric-card">
-                                <h4 style="color: white;">💰 Amount</h4>
-                                <p style="color: rgba(255,255,255,0.9); font-size: 18px;">""" + 
-                                str(result['amount']) + """</p>
-                            </div>
-                            """, unsafe_allow_html=True)
+                    for key, value in justification.items():
+                        st.markdown(f"**{key.replace('_', ' ').title()}:**")
+                        st.markdown(f"{value}")
+                        st.markdown("---")
+            
+            with tab3:
+                st.markdown("#### 📥 Export Options")
                 
-                with tab2:
-                    if result.get('justification'):
-                        st.markdown("#### 🧩 Reasoning Process")
-                        justification = result.get('justification', {})
-                        
-                        for i, (key, value) in enumerate(justification.items()):
-                            st.markdown(f"""
-                            <div class="metric-card" style="animation-delay: {i*0.1}s;">
-                                <h5 style="color: white; margin-bottom: 10px;">
-                                    {key.replace('_', ' ').title()}
-                                </h5>
-                                <p style="color: rgba(255,255,255,0.8);">{value}</p>
-                            </div>
-                            """, unsafe_allow_html=True)
+                col1, col2 = st.columns(2)
+                with col1:
+                    # Enhanced download button
+                    json_data = json.dumps(result, indent=2)
+                    st.download_button(
+                        "📄 Download JSON",
+                        data=json_data,
+                        file_name=f"math_analysis_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
+                        mime="application/json",
+                        use_container_width=True
+                    )
                 
-                with tab3:
-                    st.markdown("#### 📥 Export Options")
-                    
-                    col1, col2 = st.columns(2)
-                    with col1:
-                        # Enhanced download button
-                        json_data = json.dumps(result, indent=2)
-                        st.download_button(
-                            "📄 Download JSON",
-                            data=json_data,
-                            file_name=f"math_analysis_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
-                            mime="application/json",
-                            use_container_width=True
-                        )
-                    
-                    with col2:
-                        # Summary download
-                        summary = f"""
+                with col2:
+                    # Summary download
+                    summary = f"""
 Math Agentic-RAG Analysis Report
 Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 
@@ -588,51 +560,51 @@ Answer: {result.get('answer', 'N/A')}
 
 Decision: {result.get('decision', 'N/A')}
 Amount: {result.get('amount', 'N/A')}
-                        """
-                        st.download_button(
-                            "📋 Download Summary",
-                            data=summary,
-                            file_name=f"math_summary_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt",
-                            mime="text/plain",
-                            use_container_width=True
-                        )
-                    
-                    # Raw JSON viewer
-                    with st.expander("🔧 Raw JSON Response"):
-                        st.json(result)
+                    """
+                    st.download_button(
+                        "📋 Download Summary",
+                        data=summary,
+                        file_name=f"math_summary_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt",
+                        mime="text/plain",
+                        use_container_width=True
+                    )
                 
-                # Store in session state for persistence
-                st.session_state['last_result'] = result
-                st.session_state['last_query'] = query
-                
-            except requests.exceptions.Timeout:
-                progress_bar.empty()
-                status_text.empty()
-                st.markdown("""
-                <div class="error-message">
-                    ⏱️ Request timed out. Please try again with a simpler query.
-                </div>
-                """, unsafe_allow_html=True)
-                
-            except requests.exceptions.RequestException as e:
-                progress_bar.empty()
-                status_text.empty()
-                st.markdown(f"""
-                <div class="error-message">
-                    ❌ Connection Error: {str(e)}
-                    <br><small>Please check your internet connection and try again.</small>
-                </div>
-                """, unsafe_allow_html=True)
-                
-            except Exception as e:
-                progress_bar.empty()
-                status_text.empty()
-                st.markdown(f"""
-                <div class="error-message">
-                    ⚠️ Unexpected Error: {str(e)}
-                    <br><small>Please try again or contact support if the issue persists.</small>
-                </div>
-                """, unsafe_allow_html=True)
+                # Raw JSON viewer
+                with st.expander("🔧 Raw JSON Response"):
+                    st.json(result)
+            
+            # Store in session state for persistence
+            st.session_state['last_result'] = result
+            st.session_state['last_query'] = query
+            
+        except requests.exceptions.Timeout:
+            progress_bar.empty()
+            status_text.empty()
+            st.markdown("""
+            <div class="error-message">
+                ⏱️ Request timed out. Please try again with a simpler query.
+            </div>
+            """, unsafe_allow_html=True)
+            
+        except requests.exceptions.RequestException as e:
+            progress_bar.empty()
+            status_text.empty()
+            st.markdown(f"""
+            <div class="error-message">
+                ❌ Connection Error: {str(e)}<br>
+                <small>Please check your internet connection and try again.</small>
+            </div>
+            """, unsafe_allow_html=True)
+            
+        except Exception as e:
+            progress_bar.empty()
+            status_text.empty()
+            st.markdown(f"""
+            <div class="error-message">
+                ⚠️ Unexpected Error: {str(e)}<br>
+                <small>Please try again or contact support if the issue persists.</small>
+            </div>
+            """, unsafe_allow_html=True)
 
 # --- History Section ---
 if 'last_result' in st.session_state:
@@ -640,18 +612,18 @@ if 'last_result' in st.session_state:
     st.markdown("### 📚 Recent Analysis")
     
     with st.expander(f"Last Query: {st.session_state['last_query'][:50]}...", expanded=False):
-        st.write(f"**Answer:** {st.session_state['last_result'].get('answer', 'N/A')}")
+        st.markdown(f"**Answer:** {st.session_state['last_result'].get('answer', 'N/A')}")
         if st.session_state['last_result'].get('decision'):
-            st.write(f"**Decision:** {st.session_state['last_result']['decision']}")
+            st.markdown(f"**Decision:** {st.session_state['last_result']['decision']}")
 
 # --- Footer ---
 st.markdown("---")
 st.markdown("""
 <div class="glass-container" style="text-align: center; margin-top: 40px;">
-    <p style="color: rgba(255,255,255,0.7); margin: 0;">
+    <p style="color: rgba(255,255,255,0.9); margin: 0; font-weight: bold;">
         🚀 Powered by Advanced AI • 🔒 Secure & Private • ⚡ Real-time Processing
     </p>
-    <p style="color: rgba(255,255,255,0.5); font-size: 12px; margin: 10px 0 0 0;">
+    <p style="color: rgba(255,255,255,0.7); font-size: 14px; margin: 10px 0 0 0;">
         Built with ❤️ using Streamlit • Enhanced with Modern Web Technologies
     </p>
 </div>
