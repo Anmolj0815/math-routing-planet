@@ -1,105 +1,40 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from typing import List, Optional
-import traceback
-import re
 from ..core.processing import ingest_documents_from_urls
-from ..core.agent import math_agent_executor  # import from your package
+from ..core.retriever import get_vector_store
+from ..core.agent import generate_response
 
 router = APIRouter()
+
+# Global vector store (shared after ingestion)
+vector_store = None
+
+
+class IngestRequest(BaseModel):
+    urls: list[str]
+
 
 class QueryRequest(BaseModel):
     query: str
 
-class IngestRequest(BaseModel):
-    urls: List[str]
 
-class QueryResponse(BaseModel):
-    decision: str
-    amount: Optional[float] = None
-    justification: str
-    clauses_used: List[str]
-    
 @router.post("/ingest")
-async def ingest_documents(request: IngestRequest):
+async def ingest_docs(request: IngestRequest):
+    global vector_store
+    vector_store = ingest_documents_from_urls(request.urls)
+    if vector_store:
+        return {"status": "success", "message": "Documents ingested successfully."}
+    raise HTTPException(status_code=400, detail="Failed to ingest documents")
+
+
+@router.post("/query")
+async def process_query(request: QueryRequest):
+    global vector_store
+    if not vector_store:
+        vector_store = get_vector_store()
+
     try:
-        success = ingest_documents_from_urls(request.urls)
-        if not success:
-            raise HTTPException(status_code=500, detail="Document ingestion failed.")
-        return {"message": "Documents ingested successfully."}
+        answer = generate_response(request.query, vector_store)
+        return {"answer": answer}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
-@router.post("/query", response_model=QueryResponse)
-async def process_query(request: QueryRequest):
-    try:
-        print(f"📩 Received query: {request.query}")
-
-        # --- Call graph ASYNC and with correct state key ---
-        try:
-            result_state = await math_agent_executor.ainvoke({"query": request.query})
-            print(f"✅ Graph state out: {result_state}")
-        except Exception as agent_error:
-            print("❌ Error while calling graph:")
-            print(traceback.format_exc())
-            return QueryResponse(
-                decision="ERROR",
-                amount=None,
-                justification=f"Agent execution failed: {str(agent_error)}",
-                clauses_used=["No clauses extracted"]
-            )
-
-        # The graph writes final text into result_state["response"]
-        agent_output = str(result_state.get("response", ""))
-
-        # --- Parse into your schema ---
-        decision = "UNDER_REVIEW"
-        amount = None
-        justification = agent_output
-        clauses_used: List[str] = []
-
-        # Try to find structured JSON first (since we told LLM to return JSON)
-        try:
-            import json
-            parsed = json.loads(agent_output)
-            # Normalize keys in a tolerant way
-            decision = str(parsed.get("Decision", decision)).upper()
-            amount = parsed.get("Amount", amount)
-            justification = parsed.get("Justification", justification)
-        except Exception:
-            # If it wasn't valid JSON, fall back to regex parsing
-            up = agent_output.upper()
-            if "APPROVED" in up:
-                decision = "APPROVED"
-            elif "REJECTED" in up or "DENIED" in up:
-                decision = "REJECTED"
-
-            amt_match = re.search(r'\$?(\d+(?:,\d{3})*(?:\.\d{1,2})?)', agent_output)
-            if amt_match:
-                amount = float(amt_match.group(1).replace(",", ""))
-
-        # Extract clause-like mentions, if any
-        for pat in [r'clause\s+([\w\-\.]+)', r'section\s+([\w\-\.]+)', r'article\s+([\w\-\.]+)']:
-            for m in re.findall(pat, agent_output, flags=re.IGNORECASE):
-                clauses_used.append(f"Clause {m}")
-
-        if not clauses_used:
-            clauses_used = ["Based on document analysis"]
-
-        return QueryResponse(
-            decision=decision,
-            amount=amount,
-            justification=justification,
-            clauses_used=clauses_used
-        )
-
-    except Exception as e:
-        print("💥 Unexpected error in /query:")
-        print(traceback.format_exc())
-        # Never raise HTTPException; return JSON so the frontend never sees a 500
-        return QueryResponse(
-            decision="ERROR",
-            amount=None,
-            justification=f"Unexpected error: {str(e)}",
-            clauses_used=["No clauses extracted"]
-        )
