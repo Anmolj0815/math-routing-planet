@@ -43,22 +43,20 @@ def web_search(state: AgentState):
 
 def generate_response(llm):
     """
-    Returns a document chain that takes query + retrieved documents
-    and generates a chat-style response using ChatPromptTemplate.
+    Returns a chain that takes query + list of Documents and generates response.
     """
 
-    # Chat prompt with both system + human roles
     prompt = ChatPromptTemplate.from_messages([
         ("system", "You are a helpful assistant. Use the provided documents "
-                   "to answer the user's query. Be accurate and concise."),
-        ("human", "Documents:\n{documents}\n\nQuestion: {query}")
+                   "to answer the user's query."),
+        ("human", "Documents:\n{context}\n\nQuestion: {query}")
     ])
 
-    # Chain that injects retrieved docs into {documents}
+    # 👇 Notice: document_variable_name must match {context} above
     document_chain = create_stuff_documents_chain(
         llm,
         prompt,
-        document_variable_name="documents"   # 👈 Must match {documents}
+        document_variable_name="context"
     )
 
     return document_chain
