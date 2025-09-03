@@ -1,95 +1,98 @@
-from langgraph.graph import StateGraph, START, END
-from typing import TypedDict, List
-from langchain_core.documents import Document
-from langchain_core.prompts import ChatPromptTemplate
-from langchain.chains.combine_documents import create_stuff_documents_chain
-from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
-from langchain_community.tools.tavily_search import TavilySearchResults
-from .retriever import get_vector_store
 import os
+import google.generativeai as genai
+from langchain_community.vectorstores import FAISS
+from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI
+from langchain.prompts import ChatPromptTemplate
+from langgraph.graph import StateGraph, END
+from langchain_community.tools import TavilySearchResults
 
-# ----------------- STATE -----------------
+# ✅ Configure Gemini
+genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+
+
+# ----------- LangGraph State -----------
+from typing import TypedDict, List
+
 class AgentState(TypedDict):
     query: str
-    documents: List[Document]
-    route: str
-    response: str
+    context: List[str]
+    answer: str
 
-# ----------------- MODELS -----------------
-llm = ChatGoogleGenerativeAI(
-    model="gemini-pro",
-    temperature=0,
-    google_api_key=os.getenv("GOOGLE_API_KEY")  # ✅ force API key
-)
 
-embeddings = GoogleGenerativeAIEmbeddings(
-    model="models/embedding-001",
-    google_api_key=os.getenv("GOOGLE_API_KEY")  # ✅ force API key
-)
+# ----------- Retriever Node -----------
+def retrieve(state: AgentState, vectorstore: FAISS):
+    """Retrieve top chunks from FAISS knowledge base."""
+    retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
+    docs = retriever.get_relevant_documents(state["query"])
+    state["context"] = [doc.page_content for doc in docs]
+    return state
 
-tavily_tool = TavilySearchResults(api_key=os.getenv("TAVILY_API_KEY"))
 
-# ----------------- NODES -----------------
-def retrieve_documents(state: AgentState):
-    vector_store = get_vector_store(embeddings=embeddings)
-    retriever = vector_store.as_retriever()
-    documents = retriever.invoke(state["query"])
-    return {"documents": documents, "route": "knowledge_base"}
-
+# ----------- Web Search Node -----------
 def web_search(state: AgentState):
-    tool_input = {"query": state["query"]}
-    results = tavily_tool.invoke(tool_input)
-    return {"documents": [Document(page_content=str(results))], "route": "web_search"}
+    """Fallback to web search if no context found."""
+    tool = TavilySearchResults(max_results=3)
+    results = tool.invoke({"query": state["query"]})
+    snippets = [r["content"] for r in results]
+    state["context"] = snippets
+    return state
 
-def generate_response(llm):
-    """
-    Returns a chain that takes query + list of Documents and generates response.
-    """
 
-    prompt = ChatPromptTemplate.from_messages([
-        ("system", "You are a helpful assistant. Use the provided documents "
-                   "to answer the user's query."),
-        ("human", "Documents:\n{context}\n\nQuestion: {query}")
-    ])
+# ----------- Generator Node -----------
+def generate(state: AgentState):
+    """Generate final math solution using Gemini."""
+    llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0)
 
-    # 👇 Notice: document_variable_name must match {context} above
-    document_chain = create_stuff_documents_chain(
-        llm,
-        prompt,
-        document_variable_name="context"
-    )
+    prompt = ChatPromptTemplate.from_template("""
+    You are a **Math Problem Solving Assistant**.
+    Solve the query step by step. 
+    If context is provided, use it. 
+    If not, solve using general math knowledge.
+    
+    Question: {query}
+    
+    Context:
+    {context}
+    
+    Answer:
+    """)
 
-    return document_chain
+    chain = prompt | llm
+    response = chain.invoke({"query": state["query"], "context": "\n".join(state["context"])})
+    state["answer"] = response.content
+    return state
 
-def router_node(state: AgentState):
-    if "web" in state["query"].lower() or "search" in state["query"].lower():
-        return {"route": "web_search"}
+
+# ----------- Router Node (decide KB or Web) -----------
+def router(state: AgentState):
+    """Decide whether to use knowledge base or web search."""
+    if state["context"]:  # already filled by retriever
+        return "generate"
     else:
-        return {"route": "knowledge_base"}
+        return "web_search"
 
 
-# ----------------- WORKFLOW -----------------
-workflow = StateGraph(AgentState)
+# ----------- Build Math Agent Graph -----------
+def build_math_agent(vectorstore: FAISS):
+    workflow = StateGraph(AgentState)
 
-workflow.add_node("router", router_node)
-workflow.add_node("retrieve_documents", retrieve_documents)
-workflow.add_node("web_search", web_search)
-workflow.add_node("generate_response", generate_response)
+    # Nodes
+    workflow.add_node("retrieve", lambda s: retrieve(s, vectorstore))
+    workflow.add_node("web_search", web_search)
+    workflow.add_node("generate", generate)
 
-workflow.add_conditional_edges(
-    "router",
-    lambda x: x["route"],   # ✅ route dict se nikalo
-    {
-        "knowledge_base": "retrieve_documents",
-        "web_search": "web_search",
-    },
-)
+    # Edges
+    workflow.set_entry_point("retrieve")
+    workflow.add_conditional_edges("retrieve", router, {"generate": "generate", "web_search": "web_search"})
+    workflow.add_edge("web_search", "generate")
+    workflow.add_edge("generate", END)
+
+    return workflow.compile()
 
 
-workflow.add_edge("retrieve_documents", "generate_response")
-workflow.add_edge("web_search", "generate_response")
-workflow.add_edge("generate_response", END)
-
-workflow.set_entry_point("router")
-
-math_agent_executor = workflow.compile()
+# ----------- Public API -----------
+def generate_response(query: str, vectorstore: FAISS) -> str:
+    """Run the Math Agent pipeline."""
+    agent = build_math_agent(vectorstore)
+    result = agent.invoke({"query": query, "context": [], "answer": ""})
+    return result["answer"]
