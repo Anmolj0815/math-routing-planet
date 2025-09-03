@@ -1,85 +1,70 @@
-# app/agents.py
-
+from langgraph.graph import StateGraph, START, END
 from typing import TypedDict, List
-from langgraph.graph import StateGraph, END
-from langchain_core.messages import BaseMessage
 from langchain_core.documents import Document
 from langchain_core.prompts import ChatPromptTemplate
 from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
 from langchain_community.tools.tavily_search import TavilySearchResults
-from langchain_google_genai import ChatGoogleGenerativeAI
 from .retriever import get_vector_store
 import os
 
-
-# ----------- STATE -----------
+# ----------------- STATE -----------------
 class AgentState(TypedDict):
     query: str
     documents: List[Document]
     route: str
     response: str
 
-
-# ----------- TOOLS & LLM -----------
-tavily_tool = TavilySearchResults(api_key=os.getenv("TAVILY_API_KEY"))
+# ----------------- MODELS -----------------
 llm = ChatGoogleGenerativeAI(
     model="gemini-pro",
-    google_api_key=os.getenv("GEMINI_API_KEY")
+    temperature=0,
+    google_api_key=os.getenv("GOOGLE_API_KEY")  # ✅ force API key
 )
 
+embeddings = GoogleGenerativeAIEmbeddings(
+    model="models/embedding-001",
+    google_api_key=os.getenv("GOOGLE_API_KEY")  # ✅ force API key
+)
 
-# ----------- NODES -----------
+tavily_tool = TavilySearchResults(api_key=os.getenv("TAVILY_API_KEY"))
+
+# ----------------- NODES -----------------
 def retrieve_documents(state: AgentState):
-    """Retrieve relevant documents from vector DB."""
-    embeddings = None  # TODO: plug in actual embeddings
     vector_store = get_vector_store(embeddings=embeddings)
     retriever = vector_store.as_retriever()
     documents = retriever.invoke(state["query"])
     return {"documents": documents, "route": "knowledge_base"}
 
-
 def web_search(state: AgentState):
-    """Fallback: use Tavily web search."""
     tool_input = {"query": state["query"]}
     results = tavily_tool.invoke(tool_input)
     return {"documents": [Document(page_content=str(results))], "route": "web_search"}
 
-
 def generate_response(state: AgentState):
-    """Generate math tutor style response."""
     prompt = ChatPromptTemplate.from_template("""
-        You are a helpful math tutor. 
-        Solve the following question step by step. 
-        Show clear reasoning and intermediate steps before giving the final answer. 
-        If the query is theoretical, explain the concept in detail with examples. 
-        Always format your response with two sections:
-
-        Explanation:
-        (step-by-step reasoning, formulas, or concept details)
-
-        Final Answer:
-        (the simplified final result)
+        You are a helpful **Math Tutor Agent**. 
+        Use the following documents or knowledge to answer the student's math-related question.
 
         Question: {query}
-        Context documents (if any): {documents}
+        Documents: {documents}
+
+        Provide a clear step-by-step solution and explanation.
+        If relevant, include examples or formulas.
     """)
-    
     document_chain = create_stuff_documents_chain(llm, prompt)
     response = document_chain.invoke(
         {"documents": state["documents"], "query": state["query"]}
     )
     return {"response": response}
 
-
 def router_node(state: AgentState):
-    """Decide whether to use knowledge base or web search."""
     if "web" in state["query"].lower() or "search" in state["query"].lower():
-        return {"route": "web_search"}
+        return "web_search"
     else:
-        return {"route": "knowledge_base"}
+        return "knowledge_base"
 
-
-# ----------- WORKFLOW GRAPH -----------
+# ----------------- WORKFLOW -----------------
 workflow = StateGraph(AgentState)
 
 workflow.add_node("router", router_node)
@@ -89,7 +74,7 @@ workflow.add_node("generate_response", generate_response)
 
 workflow.add_conditional_edges(
     "router",
-    lambda state: state["route"],  # look at the "route" key we set
+    router_node,
     {
         "knowledge_base": "retrieve_documents",
         "web_search": "web_search",
@@ -102,5 +87,4 @@ workflow.add_edge("generate_response", END)
 
 workflow.set_entry_point("router")
 
-# ----------- COMPILED EXECUTOR -----------
 math_agent_executor = workflow.compile()
