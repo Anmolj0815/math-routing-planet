@@ -42,16 +42,19 @@ def web_search(state: AgentState):
     return {"documents": [Document(page_content=str(results))], "route": "web_search"}
 
 def generate_response(state: AgentState):
-    prompt = ChatPromptTemplate.from_template("""
-        You are a helpful **Math Tutor Agent**. 
-        Use the following documents or knowledge to answer the student's math-related question.
+    prompt = PromptTemplate(
+    input_variables=["context", "query"],
+    template="""
+You are a math reasoning assistant.
 
-        Question: {query}
-        Documents: {documents}
+Context:
+{context}
 
-        Provide a clear step-by-step solution and explanation.
-        If relevant, include examples or formulas.
-    """)
+Question: {query}
+
+Answer clearly and with justification.
+"""
+)
     document_chain = create_stuff_documents_chain(llm, prompt)
     response = document_chain.invoke(
         {"documents": state["documents"], "query": state["query"]}
