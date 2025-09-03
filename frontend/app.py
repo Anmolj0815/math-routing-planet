@@ -5,7 +5,7 @@ import os
 from typing import Optional, Dict, Any
 
 # Configuration
-API_URL = os.getenv('API_URL', 'https://your-backend-url.com')  # Replace with your backend URL
+API_URL = os.getenv('API_URL', 'https://math-routing-planet-backend.onrender.com')  # Replace with your backend URL
 
 # Page config
 st.set_page_config(
