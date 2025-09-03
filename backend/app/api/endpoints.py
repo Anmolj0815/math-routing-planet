@@ -10,6 +10,9 @@ router = APIRouter()
 class QueryRequest(BaseModel):
     query: str
 
+class IngestRequest(BaseModel):
+    urls: List[str]
+
 class QueryResponse(BaseModel):
     decision: str
     amount: Optional[float] = None
