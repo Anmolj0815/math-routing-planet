@@ -41,17 +41,27 @@ def web_search(state: AgentState):
     results = tavily_tool.invoke(tool_input)
     return {"documents": [Document(page_content=str(results))], "route": "web_search"}
 
-def generate_response(state: AgentState):
+def generate_response(llm):
+    """
+    Returns a document chain that takes query + retrieved documents
+    and generates a chat-style response using ChatPromptTemplate.
+    """
+
+    # Chat prompt with both system + human roles
     prompt = ChatPromptTemplate.from_messages([
-        ("system", "You are a math reasoning assistant. Use the provided context to answer questions."),
-        ("human", "Context:\n{context}\n\nQuestion: {query}")
+        ("system", "You are a helpful assistant. Use the provided documents "
+                   "to answer the user's query. Be accurate and concise."),
+        ("human", "Documents:\n{documents}\n\nQuestion: {query}")
     ])
 
-    document_chain = create_stuff_documents_chain(llm, prompt)
-    response = document_chain.invoke(
-        {"documents": state["documents"], "query": state["query"]}
+    # Chain that injects retrieved docs into {documents}
+    document_chain = create_stuff_documents_chain(
+        llm,
+        prompt,
+        document_variable_name="documents"   # 👈 Must match {documents}
     )
-    return {"response": response}
+
+    return document_chain
 
 
     document_chain = create_stuff_documents_chain(llm, prompt)
