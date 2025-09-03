@@ -4,9 +4,6 @@ import json
 import os
 import time
 from datetime import datetime
-import plotly.graph_objects as go
-import plotly.express as px
-from typing import Dict, Any
 
 API_URL = os.getenv('API_URL', 'https://math-routing-planet-backend.onrender.com')
 
@@ -331,36 +328,67 @@ st.markdown("""
 with st.sidebar:
     st.markdown("""
     <div class="glass-container">
-        <h3 style="color: white; text-align: center;">🚀 System Status</h3>
+        <h3 style="color: white; text-align: center; margin-bottom: 15px;">🚀 System Status</h3>
     </div>
     """, unsafe_allow_html=True)
     
-    # System metrics
-    col1, col2 = st.columns(2)
-    with col1:
-        st.metric("API Status", "🟢 Online", delta="100% uptime")
-    with col2:
-        st.metric("Response Time", "~2.3s", delta="-0.5s")
+    # System metrics with enhanced styling
+    st.markdown("""
+    <div style="background: rgba(255, 255, 255, 0.1); border-radius: 15px; padding: 20px; margin: 15px 0; border: 1px solid rgba(255, 255, 255, 0.2);">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+            <div style="text-align: center; flex: 1;">
+                <div style="color: #4ecdc4; font-size: 24px; font-weight: bold;">🟢</div>
+                <div style="color: white; font-size: 14px; margin: 5px 0;">API Status</div>
+                <div style="color: #4ecdc4; font-size: 16px; font-weight: bold;">Online</div>
+                <div style="color: rgba(255,255,255,0.7); font-size: 12px;">100% uptime</div>
+            </div>
+            <div style="text-align: center; flex: 1;">
+                <div style="color: #4ecdc4; font-size: 24px; font-weight: bold;">⚡</div>
+                <div style="color: white; font-size: 14px; margin: 5px 0;">Response Time</div>
+                <div style="color: #4ecdc4; font-size: 16px; font-weight: bold;">~2.3s</div>
+                <div style="color: rgba(255,255,255,0.7); font-size: 12px;">-0.5s faster</div>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
     
     # Quick stats
     st.markdown("""
     <div class="metric-card">
-        <h4 style="color: white; margin-bottom: 15px;">📊 Quick Stats</h4>
-        <p style="color: rgba(255,255,255,0.8); margin: 5px 0;">• Advanced RAG Architecture</p>
-        <p style="color: rgba(255,255,255,0.8); margin: 5px 0;">• Real-time Processing</p>
-        <p style="color: rgba(255,255,255,0.8); margin: 5px 0;">• Explainable AI Decisions</p>
-        <p style="color: rgba(255,255,255,0.8); margin: 5px 0;">• JSON Export Support</p>
+        <h4 style="color: white; margin-bottom: 15px; text-align: center;">📊 Quick Stats</h4>
+        <div style="color: rgba(255,255,255,0.9); margin: 8px 0; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+            <span style="color: #4ecdc4;">•</span> Advanced RAG Architecture
+        </div>
+        <div style="color: rgba(255,255,255,0.9); margin: 8px 0; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+            <span style="color: #4ecdc4;">•</span> Real-time Processing
+        </div>
+        <div style="color: rgba(255,255,255,0.9); margin: 8px 0; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+            <span style="color: #4ecdc4;">•</span> Explainable AI Decisions
+        </div>
+        <div style="color: rgba(255,255,255,0.9); margin: 8px 0; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+            <span style="color: #4ecdc4;">•</span> JSON Export Support
+        </div>
     </div>
     """, unsafe_allow_html=True)
     
     # Tips section
-    with st.expander("💡 Pro Tips", expanded=False):
-        st.write("""
-        - Be specific with your math questions
-        - Include context for better results
-        - Check the justification for transparency
-        - Download results for analysis
-        """)
+    st.markdown("""
+    <div style="background: rgba(255, 255, 255, 0.1); border-radius: 15px; padding: 20px; margin: 15px 0; border: 1px solid rgba(255, 255, 255, 0.2);">
+        <h4 style="color: white; margin-bottom: 15px; text-align: center;">💡 Pro Tips</h4>
+        <div style="color: rgba(255,255,255,0.9); margin: 8px 0;">
+            <span style="color: #f093fb;">→</span> Be specific with your math questions
+        </div>
+        <div style="color: rgba(255,255,255,0.9); margin: 8px 0;">
+            <span style="color: #f093fb;">→</span> Include context for better results
+        </div>
+        <div style="color: rgba(255,255,255,0.9); margin: 8px 0;">
+            <span style="color: #f093fb;">→</span> Check the justification for transparency
+        </div>
+        <div style="color: rgba(255,255,255,0.9); margin: 8px 0;">
+            <span style="color: #f093fb;">→</span> Download results for analysis
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 # --- Main Input Section ---
 st.markdown('<div class="glass-container">', unsafe_allow_html=True)
