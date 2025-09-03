@@ -31,14 +31,79 @@ async def ingest_documents(request: IngestRequest):
 @router.post("/query", response_model=QueryResponse)
 async def process_query(request: QueryRequest):
     try:
+        print(f"Processing query: {request.query}")
+        
+        # Call the agent
         result = await math_agent_executor.invoke({"input": request.query})
         
-        # NOTE: You must replace this with the actual structured output from your agent.
+        print(f"Agent result: {result}")
+        
+        # Parse the agent result
+        # The result structure depends on how your agent returns data
+        # Common patterns:
+        
+        # Pattern 1: If result is a dict with 'output' key
+        if isinstance(result, dict) and 'output' in result:
+            agent_output = result['output']
+        else:
+            agent_output = str(result)
+        
+        # Now you need to parse the agent_output to extract:
+        # - decision (APPROVED/REJECTED/etc.)
+        # - amount (if any)
+        # - justification
+        # - clauses_used
+        
+        # Example parsing (adjust based on your agent's actual output format):
+        decision = "PENDING"  # Default
+        amount = None
+        justification = agent_output  # Use full output as justification for now
+        clauses_used = []
+        
+        # If your agent returns structured data, parse it properly
+        # For example, if agent returns JSON-like structure:
+        try:
+            import json
+            import re
+            
+            # Try to find decision in the output
+            if "APPROVED" in agent_output.upper():
+                decision = "APPROVED"
+            elif "REJECTED" in agent_output.upper() or "DENIED" in agent_output.upper():
+                decision = "REJECTED"
+            else:
+                decision = "UNDER_REVIEW"
+            
+            # Try to extract amount using regex
+            amount_match = re.search(r'\$?(\d+(?:,\d{3})*(?:\.\d{2})?)', agent_output)
+            if amount_match:
+                amount_str = amount_match.group(1).replace(',', '')
+                amount = float(amount_str)
+            
+            # Extract clauses (if mentioned in output)
+            clause_patterns = [
+                r'clause\s+(\d+)',
+                r'section\s+(\w+)',
+                r'article\s+(\w+)',
+            ]
+            
+            for pattern in clause_patterns:
+                matches = re.findall(pattern, agent_output, re.IGNORECASE)
+                clauses_used.extend([f"Clause {match}" for match in matches])
+            
+        except Exception as parse_error:
+            print(f"Parsing error: {parse_error}")
+            # Keep defaults
+        
         return {
-            "decision": "placeholder_decision",
-            "amount": 0.0,
-            "justification": "This is a placeholder justification based on the processed query.",
-            "clauses_used": ["placeholder_clause_1", "placeholder_clause_2"],
+            "decision": decision,
+            "amount": amount,
+            "justification": justification,
+            "clauses_used": clauses_used if clauses_used else ["Based on document analysis"],
         }
+        
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        print(f"Error in process_query: {str(e)}")
+        import traceback
+        print(traceback.format_exc())
+        raise HTTPException(status_code=500, detail=f"Query processing failed: {str(e)}")
