@@ -9,7 +9,7 @@ API_URL = os.getenv('API_URL', 'https://math-routing-planet-backend.onrender.com
 
 # --- Enhanced Page Configuration ---
 st.set_page_config(
-    page_title="Math Agentic-RAG System",
+    page_title="Human in a loop- Math Routing Agent",
     page_icon="🧮",
     layout="wide",
     initial_sidebar_state="expanded"
