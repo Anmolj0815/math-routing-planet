@@ -60,9 +60,10 @@ def generate_response(state: AgentState):
 
 def router_node(state: AgentState):
     if "web" in state["query"].lower() or "search" in state["query"].lower():
-        return "web_search"
+        return {"route": "web_search"}
     else:
-        return "knowledge_base"
+        return {"route": "knowledge_base"}
+
 
 # ----------------- WORKFLOW -----------------
 workflow = StateGraph(AgentState)
@@ -74,12 +75,13 @@ workflow.add_node("generate_response", generate_response)
 
 workflow.add_conditional_edges(
     "router",
-    router_node,
+    lambda x: x["route"],   # ✅ route dict se nikalo
     {
         "knowledge_base": "retrieve_documents",
         "web_search": "web_search",
     },
 )
+
 
 workflow.add_edge("retrieve_documents", "generate_response")
 workflow.add_edge("web_search", "generate_response")
