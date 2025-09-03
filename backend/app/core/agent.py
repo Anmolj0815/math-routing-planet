@@ -42,12 +42,17 @@ def web_search(state: AgentState):
     return {"documents": [Document(page_content=str(results))], "route": "web_search"}
 
 def generate_response(state: AgentState):
-    from langchain.prompts import ChatPromptTemplate
+    prompt = ChatPromptTemplate.from_messages([
+        ("system", "You are a math reasoning assistant. Use the provided context to answer questions."),
+        ("human", "Context:\n{context}\n\nQuestion: {query}")
+    ])
 
-prompt = ChatPromptTemplate.from_messages([
-    ("system", "You are a math reasoning assistant. Use the provided context to answer questions."),
-    ("human", "Context:\n{context}\n\nQuestion: {query}")
-])
+    document_chain = create_stuff_documents_chain(llm, prompt)
+    response = document_chain.invoke(
+        {"documents": state["documents"], "query": state["query"]}
+    )
+    return {"response": response}
+
 
     document_chain = create_stuff_documents_chain(llm, prompt)
     response = document_chain.invoke(
