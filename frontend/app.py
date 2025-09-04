@@ -12,10 +12,10 @@ st.set_page_config(
     page_title="Human in a loop- Math Routing Agent",
     page_icon="🧮",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded"  # This should show sidebar by default
 )
 
-# --- Fixed CSS with proper text visibility ---
+# --- Fixed CSS with proper sidebar styling ---
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -77,6 +77,44 @@ st.markdown("""
     }
     
     .stDownloadButton label {
+        color: white !important;
+    }
+    
+    /* FIXED: Sidebar Styling - Most Important Part */
+    section[data-testid="stSidebar"] {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.9), rgba(118, 75, 162, 0.9)) !important;
+        backdrop-filter: blur(20px) !important;
+        -webkit-backdrop-filter: blur(20px) !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.3) !important;
+        box-shadow: 2px 0 20px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    /* Sidebar content styling */
+    section[data-testid="stSidebar"] > div {
+        background: transparent !important;
+        padding-top: 2rem !important;
+    }
+    
+    /* Sidebar text color */
+    section[data-testid="stSidebar"] * {
+        color: white !important;
+    }
+    
+    /* Sidebar header styling */
+    section[data-testid="stSidebar"] .stMarkdown h3 {
+        color: white !important;
+        font-weight: 600 !important;
+        margin-bottom: 1rem !important;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+    }
+    
+    /* Force sidebar visibility */
+    .css-1d391kg {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.9), rgba(118, 75, 162, 0.9)) !important;
+        backdrop-filter: blur(20px) !important;
+    }
+    
+    .css-1d391kg * {
         color: white !important;
     }
     
@@ -158,25 +196,6 @@ st.markdown("""
     
     .stTextArea > div > div > textarea::placeholder {
         color: #a0aec0 !important;
-    }
-    
-    /* Sidebar Fixes */
-    .css-1d391kg {
-        background: rgba(255, 255, 255, 0.1) !important;
-        backdrop-filter: blur(20px);
-    }
-    
-    .css-1d391kg * {
-        color: white !important;
-    }
-    
-    section[data-testid="stSidebar"] {
-        background: rgba(255, 255, 255, 0.1) !important;
-        backdrop-filter: blur(20px);
-    }
-    
-    section[data-testid="stSidebar"] * {
-        color: white !important;
     }
     
     /* Metric Cards */
@@ -361,6 +380,14 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
+# --- FORCED SIDEBAR CREATION ---
+# This ensures the sidebar is created and visible
+st.sidebar.markdown("# 🚀 System Dashboard")
+
+# Add a toggle to ensure sidebar appears
+if 'sidebar_visible' not in st.session_state:
+    st.session_state.sidebar_visible = True
+
 # --- Sidebar with Enhanced Features ---
 with st.sidebar:
     st.markdown("### 🚀 System Status", unsafe_allow_html=True)
@@ -419,6 +446,22 @@ with st.sidebar:
         </div>
         <div style="color: white; margin: 8px 0;">
             <span style="color: #f093fb; font-weight: bold;">→</span> Download results for analysis
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Debug section
+    st.markdown("### 🔧 Debug Info", unsafe_allow_html=True)
+    st.markdown(f"""
+    <div class="metric-card">
+        <div style="color: white; margin: 8px 0; font-size: 12px;">
+            <strong>Streamlit Version:</strong> {st.__version__}
+        </div>
+        <div style="color: white; margin: 8px 0; font-size: 12px;">
+            <strong>Sidebar State:</strong> Visible
+        </div>
+        <div style="color: white; margin: 8px 0; font-size: 12px;">
+            <strong>Page Layout:</strong> Wide
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -628,4 +671,3 @@ st.markdown("""
     </p>
 </div>
 """, unsafe_allow_html=True)
-
